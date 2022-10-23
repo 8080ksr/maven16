@@ -1,0 +1,24 @@
+node('built-in')
+{
+  stage('continuous download')
+  {
+    git 'https://github.com/8080ksr/maven16.git'
+  }
+     stage('continuous build')
+     {
+        sh 'mvn package'
+     }
+        stage('continuous deploy')
+        {
+        deploy adapters: [tomcat9(credentialsId: '11edb6fd-2916-446d-9b05-f2f79ff57930', path: '', url: 'http://172.31.28.9:8080')], contextPath: 'testapp', war: '**/*.war'
+        }
+          stage('continuous test')
+          {
+            git 'https://github.com/8080ksr/FunctionalTesting.git'
+            sh 'java -jar /var/lib/jenkins/workspace/ScriptedPipeline/testing.jar'
+          }
+            stage('continuous delivy')
+            {
+             deploy adapters: [tomcat9(credentialsId: '11edb6fd-2916-446d-9b05-f2f79ff57930', path: '', url: 'http://172.31.27.158:8080')], contextPath: 'prodapp', war: '**/*.war'
+            }
+}
